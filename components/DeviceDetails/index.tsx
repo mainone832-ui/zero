@@ -1045,7 +1045,7 @@ export default function DeviceDetails({
         </Card>
       )}
 
-      {/* SMS LIST - MODIFIED DESIGN */}
+      {/* SMS LIST - FINAL DESIGN */}
       <Card className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-none">
         <CardBody className="p-4 sm:p-6">
           {/* Search and Filter Side by Side */}
@@ -1091,51 +1091,49 @@ export default function DeviceDetails({
             ) : (
               filteredSmsList.map((sms) => (
                 <div key={sms.id} className="rounded-lg border border-gray-200 bg-white hover:shadow-md transition-shadow duration-200 p-4">
-                  {/* Message with copy icon at the top */}
-                  <div className="mb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-semibold text-blue-900 text-xs uppercase tracking-wide">MESSAGE</span>
-                      <BiCopy 
-                        onClick={() => copyToClipboard(sms.body)} 
-                        className="cursor-pointer text-gray-400 hover:text-gray-600 flex-shrink-0 mt-0.5" 
-                        size={14} 
-                      />
-                    </div>
-                    <p className="text-sm text-red-600 break-words mt-1">{sms.body}</p>
+                  {/* MESSAGE with copy icon */}
+                  <div className="flex items-center gap-1 mb-2">
+                    <span className="font-semibold text-blue-900 text-xs uppercase tracking-wide">MESSAGE</span>
+                    <BiCopy 
+                      onClick={() => copyToClipboard(sms.body)} 
+                      className="cursor-pointer text-gray-400 hover:text-gray-600" 
+                      size={12} 
+                    />
                   </div>
+                  <p className="text-sm text-red-600 break-words mb-3">{sms.body}</p>
 
-                  {/* Sender & Receiver Side by Side */}
+                  {/* SENDER & RECEIVER - SIDE BY SIDE */}
                   <div className="grid grid-cols-2 gap-4 mb-3">
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-1">
+                      <div className="flex items-center gap-1 mb-1">
                         <span className="font-semibold text-blue-900 text-xs uppercase tracking-wide">SENDER</span>
                         <BiCopy 
                           onClick={() => copyToClipboard(sms.senderNumber)} 
-                          className="cursor-pointer text-gray-400 hover:text-gray-600 flex-shrink-0" 
+                          className="cursor-pointer text-gray-400 hover:text-gray-600" 
                           size={12} 
                         />
                       </div>
-                      <p className="text-xs text-gray-700 font-mono">{sms.senderNumber}</p>
+                      <p className="text-xs text-gray-700 font-mono break-all">{sms.senderNumber}</p>
                     </div>
                     
                     {sms.reciverNumber && (
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-1">
+                        <div className="flex items-center gap-1 mb-1">
                           <span className="font-semibold text-blue-900 text-xs uppercase tracking-wide">RECEIVER</span>
                           <BiCopy 
                             onClick={() => copyToClipboard(sms.reciverNumber)} 
-                            className="cursor-pointer text-gray-400 hover:text-gray-600 flex-shrink-0" 
+                            className="cursor-pointer text-gray-400 hover:text-gray-600" 
                             size={12} 
                           />
                         </div>
-                        <p className="text-xs text-gray-700 font-mono">{sms.reciverNumber}</p>
+                        <p className="text-xs text-gray-700 font-mono break-all">{sms.reciverNumber}</p>
                       </div>
                     )}
                   </div>
 
-                  {/* Date Time - Bottom Right Corner */}
+                  {/* DATE TIME - BOTTOM RIGHT CORNER */}
                   <div className="flex justify-end mt-2 pt-2 border-t border-gray-100">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <span className="text-[10px] text-gray-400">{formatMessageTimestamp(sms.timestamp)}</span>
                       <BiCopy 
                         onClick={() => copyToClipboard(formatMessageTimestamp(sms.timestamp))} 
