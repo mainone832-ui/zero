@@ -274,6 +274,12 @@ export default function DeviceDetails({
   const [isGettingSMS, setIsGettingSMS] = useState(false);
   const [showDialog, setShowDialog] = useState<string | null>(null);
   const [activeButton, setActiveButton] = useState<string>("get-sms");
+  
+  // Online status dialog states
+  const [isOnlineDialogOpen, setIsOnlineDialogOpen] = useState(false);
+  const [onlineStatus, setOnlineStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [countdown, setCountdown] = useState(20);
+  const [statusMessage, setStatusMessage] = useState("Checking device status...");
 
   const availableSimOptions = [
     { key: "sim1", slot: 1 as const, label: `SIM 1 ${device.sim1number ? `- ${device.sim1number}` : ""}` },
@@ -319,6 +325,27 @@ export default function DeviceDetails({
     
     return () => unsubscribe();
   }, [device.deviceId]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isOnlineDialogOpen && onlineStatus === "checking" && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            // Timeout reached - device is offline
+            setOnlineStatus("offline");
+            setStatusMessage("Device did not respond. Device appears to be offline.");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isOnlineDialogOpen, onlineStatus, countdown]);
 
   // Apply date filter to SMS list
   const getDateFilteredSmsList = useMemo(() => {
@@ -457,6 +484,30 @@ export default function DeviceDetails({
     };
   }, [device.deviceId]);
 
+  // Listen for device status response
+  useEffect(() => {
+    if (!isOnlineDialogOpen) return;
+    
+    const statusRef = ref(db, `registeredDevices/${device.deviceId}/lastChecked`);
+    const unsubscribe = onValue(statusRef, (snapshot) => {
+      if (snapshot.exists() && onlineStatus === "checking") {
+        const lastChecked = snapshot.val();
+        const lastCheckedTime = new Date(lastChecked).getTime();
+        const now = Date.now();
+        const timeDiff = now - lastCheckedTime;
+        
+        // If lastChecked was updated within the last 5 seconds, device is online
+        if (timeDiff <= 5000) {
+          setOnlineStatus("online");
+          setStatusMessage("✅ Device is ONLINE and responding!");
+          setCountdown(0);
+        }
+      }
+    });
+    
+    return () => unsubscribe();
+  }, [isOnlineDialogOpen, device.deviceId, onlineStatus]);
+
   // GET SMS - Calls /api/getsms which sends type: "get_sms"
   const handleGetSMS = async () => {
     setActiveButton("get-sms");
@@ -562,6 +613,13 @@ export default function DeviceDetails({
 
   const handleCheckOnline = async () => {
     setActiveButton("check-online");
+    
+    // Open the dialog and reset states
+    setIsOnlineDialogOpen(true);
+    setOnlineStatus("checking");
+    setCountdown(20);
+    setStatusMessage("Checking device status...");
+    
     try {
       const response = await fetch("/api/checkstatus", {
         method: "POST",
@@ -575,15 +633,21 @@ export default function DeviceDetails({
       });
       const result = await response.json();
       logRequestResult("Check online", result);
+      
       if (!response.ok || !result.success) {
-        alert("Failed to check device status");
-        return;
+        setStatusMessage("Failed to send status check request.");
       }
-      alert("Status check request sent");
     } catch (error) {
       console.error("Failed to check device status", error);
-      alert("Error while checking status");
+      setStatusMessage("Error while checking status.");
     }
+  };
+
+  const handleCloseOnlineDialog = () => {
+    setIsOnlineDialogOpen(false);
+    setOnlineStatus("checking");
+    setCountdown(20);
+    setStatusMessage("Checking device status...");
   };
 
   const handleSendSMS = async () => {
@@ -843,6 +907,56 @@ export default function DeviceDetails({
           Update Admin
         </Button>
       </div>
+
+      {/* Online Status Dialog */}
+      <Modal isOpen={isOnlineDialogOpen} onClose={handleCloseOnlineDialog} size="md" hideCloseButton>
+        <ModalContent>
+          <ModalHeader className="flex flex-col gap-1">
+            Device Status Check
+          </ModalHeader>
+          <ModalBody>
+            <div className="flex flex-col items-center justify-center py-6 gap-4">
+              {onlineStatus === "checking" && (
+                <>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                  <p className="text-center text-gray-700">{statusMessage}</p>
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">Waiting for device response...</p>
+                    <p className="text-lg font-semibold text-blue-600 mt-2">{countdown} seconds remaining</p>
+                  </div>
+                </>
+              )}
+              {onlineStatus === "online" && (
+                <>
+                  <div className="text-green-600">
+                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-center text-green-600 font-semibold text-lg">Device is Online!</p>
+                  <p className="text-center text-gray-600">{statusMessage}</p>
+                </>
+              )}
+              {onlineStatus === "offline" && (
+                <>
+                  <div className="text-red-600">
+                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                  <p className="text-center text-red-600 font-semibold text-lg">Device is Offline</p>
+                  <p className="text-center text-gray-600">{statusMessage}</p>
+                </>
+              )}
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="primary" onPress={handleCloseOnlineDialog}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Send SMS Dialog */}
       {showDialog === "send-sms" && (
