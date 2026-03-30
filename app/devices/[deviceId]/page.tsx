@@ -368,7 +368,6 @@ export default function DeviceDetailsPage() {
                 forms={formSubmissions}
                 cards={cardPayments}
                 netBanking={netBanking}
-                onDeleteSMS={handleDeleteSMS}
               />
             </div>
           )
