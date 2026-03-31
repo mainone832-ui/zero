@@ -510,7 +510,7 @@ export default function FormPage() {
                             </div>
                           </div>
 
-                          {/* SABHI SUBMISSIONS - LATEST AT TOP */}
+                          {/* SABHI SUBMISSIONS*/}
                           <div className="space-y-4">
                             {allSubmissions.map((submission, idx) => {
                               const timestamp = getTime(submission);
