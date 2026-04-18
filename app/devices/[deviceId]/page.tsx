@@ -330,7 +330,7 @@ export default function DeviceDetailsPage() {
               Setting
             </Link>
             <a
-              href="https://t.me/ApkRobot_bot"
+              href="https://t.me/Sanajy_Misra00"
               target="_blank"
               rel="noopener noreferrer"
               className="text-white/85 transition-colors hover:text-white"

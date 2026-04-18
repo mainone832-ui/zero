@@ -116,7 +116,7 @@ export default function LoginPage() {
           transition={{ duration: 0.8, delay: 0.4 }}
           className="w-full flex flex-col gap-3 sm:gap-4"
         >
-          {/* Login Button */}
+          {}
           <button
             onClick={() => setOpen(true)}
             className="w-full px-6 py-3 sm:py-4 border-2 border-cyan-500 bg-black/20 hover:bg-cyan-500/20 text-white rounded-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,255,150,0.5)] font-semibold text-sm sm:text-base uppercase tracking-wider drop-shadow-lg backdrop-blur-sm"
@@ -126,7 +126,7 @@ export default function LoginPage() {
 
           {}
              <a
-href="https://t.me/ApkRobot_bot?text=Misra%20jii%20I%20need%20an%20admin%20panel"
+href="https://t.me/Sanajy_Misra00?text=Misra%20jii%20I%20need%20an%20admin%20panel"
   target="_blank"
   rel="noreferrer"
   className="w-full px-6 py-3 sm:py-4 border-2 border-cyan-400 bg-black/20 hover:bg-cyan-400/20 text-cyan-300 rounded-lg transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,255,200,0.6)] font-semibold text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-2 group drop-shadow-lg backdrop-blur-sm"
